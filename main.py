@@ -20,7 +20,8 @@ models.Base.metadata.create_all(engine)
 origins = [
   'http://localhost:3000',
   'http://localhost:3001',
-  'http://localhost:3002'
+  'http://localhost:3002',
+  'https://instagram-clone-gs8p.onrender.com'
 ]
 
 app.add_middleware(
