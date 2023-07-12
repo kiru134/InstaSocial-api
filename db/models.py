@@ -1,5 +1,5 @@
 from db.database import Base
-from sqlalchemy.sql.schema import ForeignKey, Table
+from sqlalchemy.sql.schema import ForeignKey, Table,UniqueConstraint
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column
@@ -18,17 +18,27 @@ class DbFollowers(Base):
 
 class DbUser(Base):
     __tablename__ = 'user'
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, primary_key=True)
-    email = Column(String, primary_key=True)
+    id=Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String)
+    email = Column(String)
     password = Column(String)
-    items = relationship('DbPost', back_populates='user')
+    __table_args__ = (UniqueConstraint('username', 'password',name="uniquecol"),)
+    posts = relationship('DbPost', back_populates='user')
     # following = relationship("DbUser", back_populates="user")
     # follower_id = Column(Integer,ForeignKey('user.id'),nullable=True)
     # followers = relationship('DbUser', backref=backref("parent", remote_side=[id]))
+    # followers = relationship(
+    #     "DbUser",
+    #     secondary=DbFollowers.__table__,
+    #     primaryjoin=(id == DbFollowers.user_id),
+    #     secondaryjoin=(id == DbFollowers.follower_id),
+    #     lazy="joined",
+    #     join_depth=2,
+    #     backref="followings",
+    # )
     followers = relationship(
         "DbUser",
-        secondary=DbFollowers.__table__,
+        secondary=DbFollowers,
         primaryjoin=(id == DbFollowers.user_id),
         secondaryjoin=(id == DbFollowers.follower_id),
         lazy="joined",
@@ -45,14 +55,15 @@ class DbPost(Base):
     caption = Column(String)
     timestamp = Column(DateTime)
     user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship('DbUser', back_populates='items')
+    # numLikes=Column(Integer,ForeignKey('Postlikes.post_id'))
+    user = relationship('DbUser', back_populates='posts')
     comments = relationship('DbComment', back_populates='post')
     likes = relationship("DbPostLikes", back_populates="post")
 
 
 class DbPostLikes(Base):
     __tablename__ = "Postlikes"
-    id = Column(Integer, primary_key=True, index=True)
+    likeid = Column(Integer, primary_key=True, index=True)
     username = Column(String)
     post_id = Column(Integer, ForeignKey('post.id'))
     post = relationship("DbPost", back_populates="likes")
