@@ -1,6 +1,8 @@
+from __future__ import annotations
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List
+
 
 class UserBase(BaseModel):
     username:str
@@ -51,3 +53,13 @@ class CommentBase(BaseModel):
   username: str
   text: str
   post_id: int
+
+class Users(BaseModel):
+    id:int
+    username:str
+    email:str
+    followers: List['Users']
+    class Config():
+        orm_mode = True
+
+
