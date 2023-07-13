@@ -1,6 +1,6 @@
 from db.database import Base
 from sqlalchemy.sql.schema import ForeignKey, Table,UniqueConstraint
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column
 
@@ -22,6 +22,8 @@ class DbUser(Base):
     username = Column(String)
     email = Column(String)
     password = Column(String)
+    public = Column(Boolean)
+    dp = Column(String,nullable=True)
     __table_args__ = (UniqueConstraint('username', 'email',name="uniquecol"),)
     posts = relationship('DbPost', back_populates='user')
     # following = relationship("DbUser", back_populates="user")

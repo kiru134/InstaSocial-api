@@ -21,7 +21,7 @@ def get_all(db: Session, post_id: int):
    return db.query(DbPostLikes).filter(DbPostLikes.post_id == post_id).all()
 
 def removelike(db:Session,post_id: int,username:str):
-  like = db.query(DbPostLikes).filter(DbPostLikes.post_id == post_id and DbPostLikes.username==username)
+  like = db.query(DbPostLikes).filter(DbPostLikes.post_id == post_id and DbPostLikes.username==username).delete(synchronize_session=False)
   # if not like:
   #   raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
   #         detail=f'Post with id {id} not found')

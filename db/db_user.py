@@ -14,7 +14,8 @@ def create_user(db: Session, request: UserBase):
     newuser = DbUser(
         username=request.username,
         email=request.email,
-        password=Hash.bcrypt(request.password))
+        password=Hash.bcrypt(request.password),
+        public=bool(request.public))
 
     db.add(newuser)
     db.commit()
@@ -39,28 +40,61 @@ def get_all_users(db: Session):
 
 
 
-def add_follower(db:Session, user:str,followed_by:str):
-    users :List[DbUser] = db.query(DbUser).filter(DbUser.username.in_((user,followed_by))).all()
+def add_follower(db:Session, user:str,follower:str):
+    users :List[DbUser] = db.query(DbUser).filter(DbUser.username.in_((user,follower))).all()
     if users[0].username == user:
         user = users[0]
-        followed_by = users[1]
+        follower = users[1]
     else:
         user = users[1]
-        followed_by = users[0]
+        follower = users[0]
 
-    # if type(user.followers) == List:
-    #     user.followers.append(followed_by)
-    # else:
-    #     user.followers = [followed_by]
-    add_fw = DbFollowers(user_id=user.id,follower_id=followed_by.id)
-    # add_following = DbFollowing(user_id=followed_by.id,following_id=user.id)
+    add_fw = DbFollowers(user_id=user.id,follower_id=follower.id)
     db.add(add_fw)
-    # db.add(add_following)
     db.commit()
     db.refresh(user)
     return user
 
+def remove_follower(db:Session, user:str,unfollower:str):
+    users : List[DbUser] = db.query(DbUser).filter(DbUser.username.in_((user,unfollower))).all()
+    if len(users)==0:
+        raise Exception("Incorrect usernames passed")
+    elif len(users)==1:
+        if users[0].username == user:
+            not_found = unfollower
+        else:
+            not_found = user
+        raise Exception("Username not found: "+ not_found)
+
+    if users[0].username == user:
+        user = users[0]
+        unfollower = users[1]
+    else:
+        user = users[1]
+        unfollower = users[0]
+
+    rm_foll = db.query(DbFollowers).filter( DbFollowers.user_id == user.id, DbFollowers.follower_id == unfollower.id).\
+              delete()
+    db.commit()
+    if (rm_foll)>0:
+      return True
+    else:
+      return False
 
 
+def update_profile(db:Session, request:UserBase, user:DbUser):
 
+    if request.email:
+        user.email = request.email
+    if request.public:
+        user.public = bool(request.public)
+    if request.password:
+        user.password = Hash.bcrypt(request.password)
+    if request.dp:
+        user.dp = request.dp
+
+    db.commit(user)
+    db.refresh(user)
+
+    return user
 
