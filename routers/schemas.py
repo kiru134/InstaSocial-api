@@ -1,6 +1,8 @@
+from __future__ import annotations
 from pydantic import BaseModel
 from datetime import datetime
-from typing import List
+from typing import List,ForwardRef
+
 
 class UserBase(BaseModel):
     username:str
@@ -12,6 +14,15 @@ class UserAuth(BaseModel):
   id: int
   username: str
   email: str
+
+
+class UserDisplay(BaseModel):
+    username:str
+    email:str
+    class Config():
+        orm_mode = True
+
+
 class PostBase(BaseModel):
   image_url: str
   image_url_type: str
@@ -22,6 +33,8 @@ class PostBase(BaseModel):
 # For PostDisplay
 class User(BaseModel):
   username: str
+  id:int
+
   class Config():
     orm_mode = True
 # For PostDisplay
@@ -34,16 +47,15 @@ class Comment(BaseModel):
 
 # To display Likes
 class Like(BaseModel):
-   Likeid:int
    username:str 
    post_id:int
    class Config():
       orm_mode=True
 
 class PostLikeBase(BaseModel):
-   Likeid:int
    username:str
    post_id:int
+
 class PostDisplay(BaseModel):
   id: int
   image_url: str
@@ -61,9 +73,24 @@ class CommentBase(BaseModel):
   text: str
   post_id: int
 
-class UserDisplay(BaseModel):
-  username:str
-  email:str
-  # posts:List[PostDisplay]
-  class Config():
-    orm_mode = True
+
+
+# User.update_forward_refs()
+
+class Users(BaseModel):
+    id:int
+    username:str
+    email:str
+    followers:List[User]
+    followings:List[User]
+    posts:List[PostDisplay]
+    # followers:ForwardRef("List[User]")
+    # followings:ForwardRef("List[User]")
+    # followers: List['Users']
+    # followings:List['Users']
+    class Config():
+        orm_mode = True
+
+
+
+

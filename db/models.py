@@ -22,30 +22,21 @@ class DbUser(Base):
     username = Column(String)
     email = Column(String)
     password = Column(String)
-    __table_args__ = (UniqueConstraint('username', 'password',name="uniquecol"),)
+    __table_args__ = (UniqueConstraint('username', 'email',name="uniquecol"),)
     posts = relationship('DbPost', back_populates='user')
     # following = relationship("DbUser", back_populates="user")
     # follower_id = Column(Integer,ForeignKey('user.id'),nullable=True)
     # followers = relationship('DbUser', backref=backref("parent", remote_side=[id]))
-    # followers = relationship(
-    #     "DbUser",
-    #     secondary=DbFollowers.__table__,
-    #     primaryjoin=(id == DbFollowers.user_id),
-    #     secondaryjoin=(id == DbFollowers.follower_id),
-    #     lazy="joined",
-    #     join_depth=2,
-    #     backref="followings",
-    # )
     followers = relationship(
         "DbUser",
-        secondary=DbFollowers,
+        secondary=DbFollowers.__table__,
         primaryjoin=(id == DbFollowers.user_id),
         secondaryjoin=(id == DbFollowers.follower_id),
-        lazy="joined",
-        join_depth=2,
+        # lazy="joined",
+        # join_depth=2,
         backref="followings",
     )
-
+  
 
 class DbPost(Base):
     __tablename__ = 'post'

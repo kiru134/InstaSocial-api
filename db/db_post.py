@@ -21,6 +21,17 @@ def create(db: Session, request: PostBase):
 def get_all(db:Session):
   return db.query(DbPost).all()
 
+def get_userpost(user_id:int,db:Session):
+  post =  db.query(DbPost).filter(DbPost.user_id == user_id).all()
+  if post != None:
+    return post
+  else:
+    return []
+   
+  # if not post:
+  #   return []
+  # else:
+
 def delete(db: Session, id: int, user_id: int):
   post = db.query(DbPost).filter(DbPost.id == id).first()
   if not post:

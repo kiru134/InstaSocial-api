@@ -28,6 +28,11 @@ def create(request: PostBase, db: Session = Depends(get_db),current_user:UserAut
 def posts(db: Session = Depends(get_db)):
   return db_post.get_all(db)
 
+
+@router.get("/allpost/{user_id}",response_model=List[PostDisplay])
+def userposts(user_id:int,db:Session=Depends(get_db)):
+  return db_post.get_userpost(user_id,db)
+
 @router.post('/image')
 def upload_image(image: UploadFile = File(...),current_user:UserAuth=Depends(get_current_user)):
   letters = string.ascii_letters

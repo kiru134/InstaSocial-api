@@ -1,4 +1,5 @@
 from datetime import datetime
+from fastapi import HTTPException,status
 from sqlalchemy.orm import Session
 
 from routers.schemas import PostLikeBase
@@ -7,7 +8,6 @@ from db.models import DbPostLikes
 
 def create(db: Session, request: PostLikeBase):
   new_like = DbPostLikes(
-    likeid = request.Likeid,
     username=request.username,
     post_id=request.post_id
   )
@@ -20,14 +20,16 @@ def create(db: Session, request: PostLikeBase):
 def get_all(db: Session, post_id: int):
    return db.query(DbPostLikes).filter(DbPostLikes.post_id == post_id).all()
 
+def removelike(db:Session,post_id: int,username:str):
+  like = db.query(DbPostLikes).filter(DbPostLikes.post_id == post_id and DbPostLikes.username==username)
+  # if not like:
+  #   raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+  #         detail=f'Post with id {id} not found')
+  if not like:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+          detail= f'user with {username} has not liked the post')
 
-#   new_comment = DbComment(
-#     text = request.text,
-#     username = request.username,
-#     post_id = request.post_id,
-#     timestamp = datetime.now()
-#   )
-#   db.add(new_comment)
-#   db.commit()
-#   db.refresh(new_comment)
-#   return new_comment
+  db.delete(like)
+  db.commit()
+  return 'ok'
+   

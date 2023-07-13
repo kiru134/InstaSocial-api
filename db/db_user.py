@@ -31,10 +31,13 @@ def get_user_by_username(db: Session, username: str):
 
 
 def get_all_users(db: Session):
-    users = db.query(DbUser).options(
-            subqueryload(DbUser.followers),
-            subqueryload(DbUser.followings)).all()
+    users = db.query(DbUser).all()
+    # .options(
+    #         subqueryload(DbUser.followers),
+    #         subqueryload(DbUser.followings))
     return users
+
+
 
 def add_follower(db:Session, user:str,followed_by:str):
     users :List[DbUser] = db.query(DbUser).filter(DbUser.username.in_((user,followed_by))).all()
@@ -56,5 +59,8 @@ def add_follower(db:Session, user:str,followed_by:str):
     db.commit()
     db.refresh(user)
     return user
+
+
+
 
 
