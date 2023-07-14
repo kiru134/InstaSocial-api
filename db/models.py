@@ -18,14 +18,15 @@ class DbFollowers(Base):
 
 class DbUser(Base):
     __tablename__ = 'user'
+    __table_args__ = (UniqueConstraint('username', 'email', name="uniquecol"),)
     id=Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String)
     email = Column(String)
     password = Column(String)
     public = Column(Boolean)
     dp = Column(String,nullable=True)
-    __table_args__ = (UniqueConstraint('username', 'email',name="uniquecol"),)
-    posts = relationship('DbPost', back_populates='user')
+    posts = relationship('DbPost', back_populates='user', cascade="all, delete")
+    comments = relationship('DbComment',back_populates='user',cascade="all, delete")
     # following = relationship("DbUser", back_populates="user")
     # follower_id = Column(Integer,ForeignKey('user.id'),nullable=True)
     # followers = relationship('DbUser', backref=backref("parent", remote_side=[id]))
@@ -47,35 +48,36 @@ class DbPost(Base):
     image_url_type = Column(String)
     caption = Column(String)
     timestamp = Column(DateTime)
-    user_id = Column(Integer, ForeignKey('user.id'))
-    # numLikes=Column(Integer,ForeignKey('Postlikes.post_id'))
+    user_id = Column(Integer, ForeignKey('user.id',ondelete='CASCADE'))
     user = relationship('DbUser', back_populates='posts')
-    comments = relationship('DbComment', back_populates='post')
-    likes = relationship("DbPostLikes", back_populates="post")
+    comments = relationship('DbComment', back_populates='post', cascade="all, delete-orphan")
+    likes = relationship("DbPostLikes", back_populates="post", cascade="all, delete-orphan")
 
 
 class DbPostLikes(Base):
     __tablename__ = "Postlikes"
     likeid = Column(Integer, primary_key=True, index=True)
     username = Column(String)
-    post_id = Column(Integer, ForeignKey('post.id'))
+    post_id = Column(Integer, ForeignKey('post.id',ondelete='CASCADE'))
     post = relationship("DbPost", back_populates="likes")
+    __table_args__ = ( UniqueConstraint('username', 'post_id', name="uniquepostlikes"),)
 
 
 class DbComment(Base):
     __tablename__ = 'comment'
     id = Column(Integer, primary_key=True, index=True)
     text = Column(String)
-    username = Column(String)
+    user_id = Column(Integer,ForeignKey('user.id',ondelete='CASCADE'))
     timestamp = Column(DateTime)
-    post_id = Column(Integer, ForeignKey('post.id'))
+    post_id = Column(Integer, ForeignKey('post.id',ondelete='CASCADE'))
     post = relationship("DbPost", back_populates="comments")
-    likes = relationship("DbCommentLikes", back_populates="comment")
+    likes = relationship("DbCommentLikes", back_populates="comment", cascade="all, delete-orphan")
+    user = relationship("DbUser",uselist=False, back_populates="comments")
 
 
 class DbCommentLikes(Base):
     __tablename__ = "Commentlikes"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String)
-    comment_id = Column(Integer, ForeignKey('comment.id'))
-    comment = relationship("DbComment", back_populates="likes")
+    comment_id = Column(Integer, ForeignKey('comment.id',ondelete='CASCADE'))
+    comment = relationship("DbComment", uselist=False, back_populates="likes")

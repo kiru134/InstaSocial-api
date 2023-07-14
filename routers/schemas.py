@@ -1,15 +1,18 @@
 from __future__ import annotations
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import datetime
 from typing import List, ForwardRef, Optional
+
+from routers.validators import string_must_contain_letter
 
 
 class UserBase(BaseModel):
     username: str
-    email: Optional[str]
-    password: Optional[str]
-    public: Optional[str]
-    dp:Optional[str]
+    email: Optional[str] = None
+    password: Optional[str] = None
+    public: Optional[int] = 0
+    dp: Optional[str] = None
+    newusername: Optional[str] = None
 
 
 class UserAuth(BaseModel):
@@ -31,6 +34,8 @@ class PostBase(BaseModel):
     image_url_type: str
     caption: str
     creator_id: int
+
+    img_validator = field_validator('image_url')(string_must_contain_letter)
 
 
 # For PostDisplay
@@ -65,6 +70,10 @@ class PostLikeBase(BaseModel):
     username: str
     post_id: int
 
+class CommentLike(BaseModel):
+    username: str
+    comment_id: int
+
 
 class PostDisplay(BaseModel):
     id: int
@@ -81,10 +90,12 @@ class PostDisplay(BaseModel):
 
 
 class CommentBase(BaseModel):
-    username: str
+    user_id: int
     text: str
     post_id: int
 
+class RemoveComment(BaseModel):
+    id: int
 
 # User.update_forward_refs()
 

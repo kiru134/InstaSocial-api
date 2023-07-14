@@ -42,6 +42,16 @@ def get_all_users(db: Session):
 
 def add_follower(db:Session, user:str,follower:str):
     users :List[DbUser] = db.query(DbUser).filter(DbUser.username.in_((user,follower))).all()
+
+    if len(users) == 0:
+        raise Exception("Incorrect usernames passed")
+    elif len(users) == 1:
+        if users[0].username == user:
+            not_found = follower
+        else:
+            not_found = user
+        raise Exception("Username not found: " + not_found)
+
     if users[0].username == user:
         user = users[0]
         follower = users[1]
@@ -83,7 +93,12 @@ def remove_follower(db:Session, user:str,unfollower:str):
 
 
 def update_profile(db:Session, request:UserBase, user:DbUser):
-
+    if request.newusername:
+        newuser = db.query(DbUser.username).filter(DbUser.username == request.newusername).first()
+        if newuser:
+            raise Exception("Username already taken")
+        else:
+            user.username = request.newusername
     if request.email:
         user.email = request.email
     if request.public:
@@ -93,7 +108,7 @@ def update_profile(db:Session, request:UserBase, user:DbUser):
     if request.dp:
         user.dp = request.dp
 
-    db.commit(user)
+    db.commit()
     db.refresh(user)
 
     return user

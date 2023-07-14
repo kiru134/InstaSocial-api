@@ -1,4 +1,4 @@
-from routers.schemas import CommentBase, UserAuth
+from routers.schemas import CommentBase, UserAuth, RemoveComment
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from db.database import get_db
@@ -15,6 +15,17 @@ def comments(post_id: int, db: Session = Depends(get_db)):
   return db_comment.get_all(db, post_id)
 
 
-@router.post('')
-def create(request: CommentBase, db: Session = Depends(get_db), current_user: UserAuth = Depends(get_current_user)):
-  return db_comment.create(db, request)
+@router.post('/add')
+def create(request: CommentBase, db: Session = Depends(get_db)):
+  try:
+    return db_comment.create(db, request)
+  except Exception as e:
+    return {'success': False, 'detail': "Couldn't add comment: " + str(e)}
+
+@router.delete('/delete')
+def create(request: RemoveComment, db: Session = Depends(get_db)):
+  try:
+    db_comment.remove(db, request)
+    return {'success': True, 'detail': "Removed Comment"}
+  except Exception as e:
+    return {'success': False, 'detail': "Couldn't remove comment: " + str(e)}
