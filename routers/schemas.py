@@ -42,6 +42,8 @@ class PostBase(BaseModel):
 class User(BaseModel):
     username: str
     id: int
+    public: bool
+    dp: Optional[str]
 
     class Config():
         orm_mode = True
@@ -50,8 +52,9 @@ class User(BaseModel):
 # For PostDisplay
 class Comment(BaseModel):
     text: str
-    username: str
+    user : User
     timestamp: datetime
+    likes: List [ CommentLike ]
 
     class Config():
         orm_mode = True
@@ -104,6 +107,7 @@ class Users(BaseModel):
     username: str
     email: str
     public: bool
+    dp: Optional[str]
     followers: List[User]
     followings: List[User]
     posts: List[PostDisplay]

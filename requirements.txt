@@ -1,9 +1,10 @@
-fastapi
-uvicorn
-sqlalchemy
-passlib
+fastapi~=0.100.0
+uvicorn~=0.22.0
+sqlalchemy~=2.0.18
+passlib~=1.7.4
 bcrypt
 python-multipart
 python-jose
 aiofiles
 requests
+pydantic~=2.0.2
