@@ -51,8 +51,8 @@ def get_user_by_username_wrt_current_user(db: Session, username: str, current_us
     user = db.query(DbFollowers).filter(DbFollowers.user_id ==username.id,DbFollowers.follower_id == current_user.id).first()
 
     if not user:
-        raise Exception( f'{username.username} is not followed by current user:{current_user.username}' )
-    return username
+        return username,0
+    return username,1
 
 
 def get_all_users(db: Session):

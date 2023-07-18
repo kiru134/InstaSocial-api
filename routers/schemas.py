@@ -46,6 +46,7 @@ class User(BaseModel):
     dp: Optional[str]
 
     class Config():
+        from_attributes = True
         orm_mode = True
 
 
@@ -57,6 +58,7 @@ class Comment(BaseModel):
     likes: List [ CommentLike ]
 
     class Config():
+        from_attributes = True
         orm_mode = True
 
 
@@ -66,6 +68,7 @@ class Like(BaseModel):
     post_id: int
 
     class Config():
+        from_attributes = True
         orm_mode = True
 
 
@@ -89,6 +92,7 @@ class PostDisplay(BaseModel):
     likes: List[Like]
 
     class Config():
+        from_attributes = True
         orm_mode = True
 
 
@@ -113,4 +117,5 @@ class Users(BaseModel):
     posts: List[PostDisplay]
 
     class Config():
+        from_attributes = True
         orm_mode = True
