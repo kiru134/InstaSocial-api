@@ -30,6 +30,30 @@ def get_user_by_username(db: Session, username: str):
                             detail=f'User with username {username} not found')
     return user
 
+def get_user_by_username_wrt_current_user(db: Session, username: str, current_user:str):
+    users: List[DbUser] = db.query(DbUser).filter(DbUser.username.in_((username, current_user))).all()
+    if len(users) == 0:
+        raise Exception("Incorrect usernames passed")
+    elif len(users) == 1:
+        if users[0].username == username:
+            username = current_user
+        else:
+            username = username
+        raise Exception("Username not found: " + username)
+
+    if users[0].username == username:
+        username = users[0]
+        current_user = users[1]
+    else:
+        username = users[1]
+        current_user = users[0]
+
+    user = db.query(DbFollowers).filter(DbFollowers.user_id ==username.id,DbFollowers.follower_id == current_user.id).first()
+
+    if not user:
+        raise Exception( f'{username.username} is not followed by current user:{current_user.username}' )
+    return username
+
 
 def get_all_users(db: Session):
     users = db.query(DbUser).all()

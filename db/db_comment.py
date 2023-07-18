@@ -30,5 +30,5 @@ def remove(db: Session, request: RemoveComment):
 
 
 
-def get_all(db: Session, post_id: int):
-  return db.query(DbComment).filter(DbComment.post_id == post_id).all()
+def get_all(db: Session, post_id: int,limit:int,skip:int):
+  return db.query(DbComment).limit(limit).offset(skip).filter(DbComment.post_id == post_id).all()
