@@ -1,4 +1,4 @@
 fastapi-env
-__pycache__
-db/ __pycache__/
+__pycache__/
+db/__pycache__/
 .idea
