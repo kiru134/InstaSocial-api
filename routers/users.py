@@ -2,6 +2,8 @@
 from typing import Dict, List, Optional, Union
 
 from fastapi import APIRouter, HTTPException
+from starlette import status
+
 from .schemas import UserDisplay, Users
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -61,12 +63,15 @@ async def get_user_by_username(username: str, db: Session = Depends(get_db)):
 
 @router.get('/user', response_model=Dict)
 async def get_user_by_username_wrt_current_user(username: str, current_user:str, db: Session = Depends(get_db)):
-        user,status = db_user.get_user_by_username_wrt_current_user(db, username, current_user)
-        if status:
-            return {'success': True, 'detail': "Success",'user':Users.from_orm(user) }
-        else:
-            return {'success': False,'detail':f'{username} is not followed by current user:{current_user}' ,'user':Users.from_orm(user)}
-
+       try:
+            user,statuss = db_user.get_user_by_username_wrt_current_user(db, username, current_user)
+            if statuss:
+                return {'success': True, 'detail': "Success",'user':Users.from_orm(user) }
+            else:
+                return {'success': False,'detail':f'{username} is not followed by current user:{current_user}' ,'user':Users.from_orm(user)}
+       except Exception as e:
+           raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
+                            detail=str(e))
 @router.post('/add-follower')
 async def add_following(db: Session = Depends(get_db), username: str = None, follower: str = None):
     if not username or not follower:

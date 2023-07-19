@@ -25,7 +25,7 @@ class DbUser(Base):
     password = Column(String)
     public = Column(Boolean)
     dp = Column(String,nullable=True)
-    posts = relationship('DbPost', back_populates='user', cascade="all, delete-orphan")
+    posts = relationship('DbPost', order_by="desc(post.timestamp)", back_populates='user', cascade="all, delete-orphan")
     comments = relationship('DbComment',back_populates='user',cascade="all, delete-orphan")
     # following = relationship("DbUser", back_populates="user")
     # follower_id = Column(Integer,ForeignKey('user.id'),nullable=True)
@@ -50,7 +50,7 @@ class DbPost(Base):
     timestamp = Column(DateTime)
     user_id = Column(Integer, ForeignKey('user.id',ondelete='CASCADE'))
     user = relationship('DbUser', back_populates='posts')
-    comments = relationship('DbComment', back_populates='post', cascade="all,delete",passive_deletes=True)
+    comments = relationship('DbComment', order_by="desc(comment.timestamp)", back_populates='post', cascade="all,delete",passive_deletes=True)
     likes = relationship("DbPostLikes", back_populates="post", cascade="all,delete",passive_deletes=True)
 
 

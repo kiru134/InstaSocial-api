@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, UploadFile, File
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 from routers.schemas import PostBase, PostDisplay, UserAuth
-from db.database import get_db
+from db.database import get_db, Base, engine
 from auth.oAuth2 import get_current_user
 from db import db_post
 from typing import List
@@ -10,6 +10,7 @@ import random
 import string
 import shutil
 
+Base.metadata.create_all(bind=engine,checkfirst=True)
 router = APIRouter(
     prefix='/post',
     tags=['post'],

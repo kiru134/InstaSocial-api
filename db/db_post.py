@@ -27,7 +27,7 @@ def get_all(db: Session):
 
 
 def get_userpost(user_name: str, db: Session):
-    posts = db.query(DbPost).filter(and_(DbPost.user_id == DbUser.id, DbUser.username == user_name)).all()
+    posts = db.query(DbPost).filter(and_(DbPost.user_id == DbUser.id, DbUser.username == user_name)).order_by( desc(DbPost.timestamp)).all()
     if posts != None:
         return posts
     else:
