@@ -37,6 +37,9 @@ class PostBase(BaseModel):
 
     img_validator = field_validator('image_url')(string_must_contain_letter)
 
+class CommentLike(BaseModel):
+    username: str
+    comment_id: int
 
 # For PostDisplay
 class User(BaseModel):
@@ -52,6 +55,7 @@ class User(BaseModel):
 
 # For PostDisplay
 class Comment(BaseModel):
+    id : int
     text: str
     user : User
     timestamp: datetime
@@ -75,10 +79,6 @@ class Like(BaseModel):
 class PostLikeBase(BaseModel):
     username: str
     post_id: int
-
-class CommentLike(BaseModel):
-    username: str
-    comment_id: int
 
 
 class PostDisplay(BaseModel):
@@ -119,3 +119,5 @@ class Users(BaseModel):
     class Config():
         from_attributes = True
         orm_mode = True
+
+

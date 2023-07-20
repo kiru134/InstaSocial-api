@@ -1,10 +1,13 @@
+from typing import Union
+
 from fastapi import HTTPException, status
-from sqlalchemy import or_, and_, desc
+from sqlalchemy import or_, and_, desc, func, select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.testing import in_
 
 from routers.schemas import PostBase
 from sqlalchemy.orm.session import Session
-from db.models import DbPost, DbUser, DbFollowers
+from db.models import DbPost, DbUser, DbFollowers, DbComment
 import datetime
 
 
@@ -51,11 +54,28 @@ def delete(db: Session, id: int, user_id: int):
 def get_postfeed_for_user(db: Session, username: str):
     followings = db.query(DbFollowers.user_id).where(DbFollowers.follower_id == DbUser.id).filter(
         username == DbUser.username)
-    posts = db.query(DbPost).where(DbPost.user_id == DbUser.id).filter(
-        or_(and_(DbUser.public == True, DbUser.username != username),
+    posts = db.query(DbPost).join(DbUser).join(DbComment).filter( or_(and_(DbUser.public == True, DbUser.username != username),
             DbPost.user_id.in_(followings.subquery()))).order_by(
-        desc(DbPost.timestamp)
-    )
+        desc(DbPost.timestamp)).all()
+    # posts = db.query(DbPost).join(DbUser).where(DbPost.DbComment).filter(DbUser.username == username).all()
+    if posts:
+        return posts
+    else:
+        return []
+
+def get_postfeed_with_comment(db: Session, username: str,limit:int,page:int):
+    skip = limit * page - limit
+    followings = db.query(DbFollowers.user_id).where(DbFollowers.follower_id == DbUser.id).filter(
+        username == DbUser.username)
+
+    # stmt = (select(DbPost).options(selectinload(DbPost.user).load_only(DbUser.id, DbUser.username, DbUser.dp)).filter(DbPost.id==2))
+    #
+    # ll = db.scalars(stmt).all()
+    
+    posts = db.query(DbPost).options(selectinload(DbPost.user).load_only(DbUser.id, DbUser.username, DbUser.dp)).join(DbUser).filter( or_(and_(DbUser.public == True, DbUser.username != username),
+            DbPost.user_id.in_(followings.subquery()))).order_by(
+        desc(DbPost.timestamp)).offset(skip).limit(limit).all()
+    # posts = db.query(DbPost).join(DbUser).where(DbPost.DbComment).filter(DbUser.username == username).all()
     if posts:
         return posts
     else:
