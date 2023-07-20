@@ -12,8 +12,8 @@ class Message(Base):
     sender_id = Column(String, ForeignKey('user.id'))
     receiver_id = Column(String,  ForeignKey('user.id'))
     code = Column(String)
-    sender = relationship('DbUser', backref= backref("sent_msgs",cascade="all, delete-orphan"))
-    receiver = relationship('DbUser', backref= backref("received_msgs",cascade="all, delete-orphan"))
+    sender = relationship('DbUser', foreign_keys=[sender_id],backref= backref("sent_msgs",cascade="all, delete-orphan"))
+    receiver = relationship('DbUser', foreign_keys=[receiver_id], backref= backref("received_msgs",cascade="all, delete-orphan"))
 
 class MessageMapper(Base):
     __tablename__ = 'message_mapper'
@@ -21,4 +21,4 @@ class MessageMapper(Base):
     sender_id = Column(String, ForeignKey('user.id'))
     receiver_id = Column(String,  ForeignKey('user.id'))
     code = Column(String, ForeignKey('message.code'))
-    msgs = relationship('Message', backref="mapper",cascade="all, delete-orphan")
+    msgs = relationship('Message',  backref="mapper", cascade="all, delete")

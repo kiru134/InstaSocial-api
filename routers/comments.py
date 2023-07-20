@@ -11,8 +11,8 @@ router = APIRouter(
 )
 
 @router.get('/all/{post_id}')
-def comments(post_id: int, limit:int=10, skip:int= 0, db: Session = Depends(get_db)):
-  return db_comment.get_all(db, post_id,limit,skip)
+def comments(post_id: int, limit:int=10, page:int= 1, db: Session = Depends(get_db)):
+  return db_comment.get_all(db, post_id,limit,page)
 
 
 @router.post('/add')

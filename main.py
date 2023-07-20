@@ -1,6 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
-from db import models
+from db import models,msg_models
 from db.database import engine
 from routers import users, posts, comments, PostLikes, comment_likes
 from fastapi.staticfiles import StaticFiles
@@ -18,8 +18,8 @@ app.include_router(PostLikes.router)
 app.include_router(comment_likes.router)
 
 
-models.Base.metadata.create_all(engine)
-
+models.Base.metadata.create_all(engine,checkfirst=True)
+msg_models.Base.metadata.create_all(engine,checkfirst=True)
 origins = [
   'http://localhost:3000',
   'http://localhost:3001',
