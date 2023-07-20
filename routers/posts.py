@@ -10,7 +10,6 @@ import random
 import string
 import shutil
 
-Base.metadata.create_all(bind=engine,checkfirst=True)
 router = APIRouter(
     prefix='/post',
     tags=['post'],

@@ -30,5 +30,6 @@ def remove(db: Session, request: RemoveComment):
 
 
 
-def get_all(db: Session, post_id: int,limit:int,skip:int):
+def get_all(db: Session, post_id: int,limit:int,page:int):
+  skip = limit * page - limit
   return db.query(DbComment).limit(limit).offset(skip).filter(DbComment.post_id == post_id).all()
