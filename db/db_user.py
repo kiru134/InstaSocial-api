@@ -16,7 +16,7 @@ def create_user(db: Session, request: UserBase):
         email=request.email,
         password=Hash.bcrypt(request.password),
         public=bool(request.public),
-        db=request.dp)
+        dp=request.dp)
 
     db.add(newuser)
     db.commit()
