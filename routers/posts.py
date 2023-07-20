@@ -40,8 +40,8 @@ def userposts(user_name: str, db: Session = Depends(get_db)):
 
 
 @router.get("/postfeed", response_model=List[PostDisplay])
-def postfeed(user_name: str, db: Session = Depends(get_db)):
-    return db_post.get_postfeed_for_user(username=user_name, db=db)
+def postfeed(user_name: str, limit:int=10, page:int= 1, db: Session = Depends(get_db)):
+    return db_post.get_postfeed_with_comment(username=user_name, db=db,limit=limit,page=page)
 
 
 @router.post('/image')

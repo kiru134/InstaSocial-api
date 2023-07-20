@@ -1,4 +1,6 @@
-from routers.schemas import CommentBase, UserAuth, RemoveComment
+from typing import List
+
+from routers.schemas import CommentBase, UserAuth, RemoveComment, Comment
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from db.database import get_db
@@ -10,7 +12,7 @@ router = APIRouter(
   tags=['comment']
 )
 
-@router.get('/all/{post_id}')
+@router.get('/all/{post_id}',response_model=List[Comment])
 def comments(post_id: int, limit:int=10, page:int= 1, db: Session = Depends(get_db)):
   return db_comment.get_all(db, post_id,limit,page)
 
