@@ -1,15 +1,18 @@
 # from ctypes import Union
+from random import random
 from typing import Dict, List, Optional, Union
 
 from fastapi import APIRouter, HTTPException
 from starlette import status
 
+from db.models import DbUser
 from .schemas import UserDisplay, Users
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from db.database import get_db
 from db import db_user
 from routers.schemas import UserBase
+from .send_email import email
 
 router = APIRouter(
     prefix='/users',
@@ -95,3 +98,29 @@ async def remove_following(db: Session = Depends(get_db), username: str = None, 
             return {'success': False, 'detail': f"Couldn't remove follower since {follower} doesn't follow {username} "}
     except Exception as exp:
         return {'success': False, 'detail': "Couldn't remove follower due to: " + str(exp)}
+
+
+@router.post('/generate-otp', response_model=Dict)
+async def GenerateOtp(db: Session = Depends(get_db), username: str = None):
+    if not username:
+        return {'success': False, 'detail': 'Query params cannot be empty'}
+    try:
+        user:DbUser = db_user.get_user_by_username(username)
+        otp = random(6)
+
+        subject = "Insta Social - Account Verification Code "
+
+        body = f"Hi {user.username}!\
+           Here's the code for resetting the password in Insta Social Account {username} : {otp}\
+           Don't show this code to other people.\
+           \
+           This message was generated automatically. Don't reply to this message\
+           Insta-Social team"
+
+        email(to=user.email,subject=subject,body=body)
+        return {'success': True, 'detail': 'OTP sent'}
+
+    except HTTPException as e:
+        return {'success': False, 'detail': e.detail}
+    except Exception as exp:
+        return {'success': False, 'detail': "Couldn't send email due to : " + str(exp)}

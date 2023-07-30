@@ -81,3 +81,10 @@ class DbCommentLikes(Base):
     username = Column(String)
     comment_id = Column(Integer, ForeignKey('comment.id',ondelete='CASCADE'))
     comment = relationship("DbComment", uselist=False, back_populates="likes")
+
+class OTP(Base):
+    __tablename__ = "otp"
+    __table_args__ = (UniqueConstraint('username', 'password', name="otpcol"),)
+    username = Column(String, primary_key=True)
+    password = Column(Integer)
+    validity = Column(DateTime)
