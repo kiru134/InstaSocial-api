@@ -1,5 +1,7 @@
 # from ctypes import Union
-from random import random
+from datetime import datetime
+from http import HTTPStatus
+import random
 from typing import Dict, List, Optional, Union
 
 from fastapi import APIRouter, HTTPException
@@ -100,22 +102,20 @@ async def remove_following(db: Session = Depends(get_db), username: str = None, 
         return {'success': False, 'detail': "Couldn't remove follower due to: " + str(exp)}
 
 
-@router.post('/generate-otp', response_model=Dict)
+@router.post('/generate-otp')
 async def GenerateOtp(db: Session = Depends(get_db), username: str = None):
     if not username:
         return {'success': False, 'detail': 'Query params cannot be empty'}
     try:
-        user:DbUser = db_user.get_user_by_username(username)
-        otp = random(6)
+        user:DbUser = db_user.get_user_by_username(db,username)
+        otp = random.randrange(100000, 999999)
 
         subject = "Insta Social - Account Verification Code "
 
-        body = f"Hi {user.username}!\
-           Here's the code for resetting the password in Insta Social Account {username} : {otp}\
-           Don't show this code to other people.\
-           \
-           This message was generated automatically. Don't reply to this message\
-           Insta-Social team"
+        db_user.addOTP(db,username,otp)
+
+        body = f"Hi {user.username}!\n\nHere's the code for resetting the password in Insta Social Account {username} : {otp}.\nDon't show this code to other people.\
+           \n\nThis message was generated automatically. Don't reply to this message\nInsta-Social team"
 
         email(to=user.email,subject=subject,body=body)
         return {'success': True, 'detail': 'OTP sent'}
@@ -124,3 +124,22 @@ async def GenerateOtp(db: Session = Depends(get_db), username: str = None):
         return {'success': False, 'detail': e.detail}
     except Exception as exp:
         return {'success': False, 'detail': "Couldn't send email due to : " + str(exp)}
+
+
+@router.post('/verify-otp')
+async def VerifyOtp(db: Session = Depends(get_db), username: str = None, otp:str = None):
+    if not username or not otp:
+        return {'success': False, 'detail': 'Query params cannot be empty'}
+    try:
+        user_otp = db_user.fetchOTP(db,username)
+        if user_otp.password != int(otp):
+           raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Wrong otp received")
+        elif user_otp.password == int(otp):
+            if user_otp.validity >= datetime.now():
+                return {'success': True, 'detail': "OTP Matched"}
+            else:
+                raise HTTPException(status_code=status.HTTP_410_GONE, detail="OTP expired")
+    except HTTPException as e:
+        raise e
+    except Exception as exp:
+        return {'success': False, 'detail': "Couldn't verify otp due to: " + str(exp)}

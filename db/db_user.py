@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import List
 
 from sqlalchemy import select
@@ -5,7 +6,7 @@ from sqlalchemy.orm import joinedload, load_only, subqueryload
 
 from routers.schemas import UserBase
 from sqlalchemy.orm.session import Session
-from db.models import DbUser, DbFollowers
+from db.models import DbUser, DbFollowers, OTP
 from db.Hash import Hash
 from fastapi import HTTPException, status
 
@@ -137,4 +138,24 @@ def update_profile(db:Session, request:UserBase, user:DbUser):
     db.refresh(user)
 
     return user
+
+def addOTP(db:Session, username:str, otp:str):
+    obj = db.query(OTP).filter(OTP.username==username).first()
+    if obj:
+       obj.password = otp
+       obj.validity = datetime.now()+timedelta(minutes=10)
+       db.commit()
+       db.refresh(obj)
+    else:
+        new = OTP(username=username,password=otp,validity=datetime.now()+timedelta(minutes=10))
+        db.add(new)
+        db.commit()
+        db.refresh(new)
+
+def fetchOTP(db:Session, username:str):
+    obj = db.query(OTP).filter(OTP.username==username).first()
+    if obj:
+       return obj
+    else:
+       raise Exception("otp not generated yet")
 
